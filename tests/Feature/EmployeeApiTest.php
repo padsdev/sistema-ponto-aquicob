@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Employee;
+use App\Support\Cpf;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
@@ -27,6 +28,7 @@ test('store creates an employee', function () {
 
     $response->assertCreated();
     $response->assertJsonPath('data.name', 'João Teste');
+    $response->assertJsonPath('data.cpf', Cpf::formatMasked('12345678909'));
     $this->assertDatabaseHas('employees', ['cpf' => '12345678909']);
 });
 
@@ -46,6 +48,31 @@ test('store rejects invalid cpf format', function () {
     $response = $this->postJson('/api/employees', [
         'name' => 'João',
         'cpf' => '123',
+        'position' => 'Cargo',
+    ]);
+
+    $response->assertUnprocessable();
+});
+
+test('store rejects cpf with invalid check digits', function () {
+    $response = $this->postJson('/api/employees', [
+        'name' => 'João Check',
+        'cpf' => '12345678901',
+        'position' => 'Cargo',
+    ]);
+
+    $response->assertUnprocessable();
+});
+
+test('store rejects duplicate name', function () {
+    Employee::factory()->create([
+        'name' => 'Nome Único Colisão',
+        'cpf' => '52998224725',
+    ]);
+
+    $response = $this->postJson('/api/employees', [
+        'name' => 'Nome Único Colisão',
+        'cpf' => '11144477735',
         'position' => 'Cargo',
     ]);
 
@@ -86,7 +113,7 @@ test('update allows keeping same cpf', function () {
     ]);
 
     $response->assertSuccessful();
-    $response->assertJsonPath('data.cpf', '12345678909');
+    $response->assertJsonPath('data.cpf', Cpf::formatMasked('12345678909'));
 });
 
 test('destroy deletes employee', function () {

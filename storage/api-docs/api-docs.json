@@ -244,16 +244,15 @@
                 ],
                 "properties": {
                     "name": {
-                        "description": "Nome completo",
+                        "description": "Nome completo (letras, até 120 caracteres)",
                         "type": "string",
                         "example": "Maria Silva",
-                        "maxLength": 255
+                        "maxLength": 120
                     },
                     "cpf": {
-                        "description": "CPF com 11 dígitos (somente números)",
+                        "description": "CPF com 11 dígitos (com ou sem máscara na API)",
                         "type": "string",
-                        "pattern": "^[0-9]{11}$",
-                        "example": "52998224725"
+                        "example": "529.982.247-25"
                     },
                     "position": {
                         "description": "Cargo",
@@ -269,12 +268,11 @@
                     "name": {
                         "type": "string",
                         "example": "Maria Silva Santos",
-                        "maxLength": 255
+                        "maxLength": 120
                     },
                     "cpf": {
                         "type": "string",
-                        "pattern": "^[0-9]{11}$",
-                        "example": "52998224725"
+                        "example": "529.982.247-25"
                     },
                     "position": {
                         "type": "string",
@@ -297,7 +295,7 @@
                     },
                     "cpf": {
                         "type": "string",
-                        "example": "52998224725"
+                        "example": "529.982.247-25"
                     },
                     "position": {
                         "type": "string",
