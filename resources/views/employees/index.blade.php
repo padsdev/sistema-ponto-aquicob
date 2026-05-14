@@ -24,6 +24,7 @@
                     <th>Nome</th>
                     <th>CPF</th>
                     <th>Cargo</th>
+                    <th>Perfil</th>
                     <th>Ações</th>
                 </tr>
             </thead>
@@ -33,6 +34,7 @@
                     <td>{{ $employee->name }}</td>
                     <td>{{ $employee->cpf_formatted }}</td>
                     <td>{{ $employee->position }}</td>
+                    <td>{{ $employee->role->label() }}</td>
                     <td>
                         <button
                             type="button"
@@ -41,6 +43,7 @@
                             data-bs-target="#editEmployeeModal"
                             data-employee-id="{{ $employee->id }}"
                             data-name="{{ e($employee->name) }}"
+                            data-role="{{ $employee->role->value }}"
                             data-position="{{ e($employee->position) }}"
                             data-cpf-formatted="{{ e($employee->cpf_formatted) }}"
                             data-original-name="{{ e($employee->name) }}"
@@ -81,6 +84,28 @@
                         <label class="form-label">Cargo/Função</label>
                         <input type="text" name="position" value="{{ old('edit_employee_id') ? '' : old('position') }}" class="form-control @error('position') is-invalid @enderror" autocomplete="organization-title">
                         @error('position')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Senha</label>
+                        <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" autocomplete="new-password">
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar senha</label>
+                        <input type="password" name="password_confirmation" class="form-control" autocomplete="new-password">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Perfil</label>
+                        <select name="role" class="form-select @error('role') is-invalid @enderror">
+                            @foreach (\App\Enums\EmployeeRole::cases() as $roleCase)
+                                <option value="{{ $roleCase->value }}" @selected(old('role', \App\Enums\EmployeeRole::Colaborador->value) === $roleCase->value)>{{ $roleCase->label() }}</option>
+                            @endforeach
+                        </select>
+                        @error('role')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
@@ -126,6 +151,28 @@
                         @error('position')
                             <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Perfil</label>
+                        <select name="role" id="editRoleSelect" class="form-select @error('role') is-invalid @enderror">
+                            @foreach (\App\Enums\EmployeeRole::cases() as $roleCase)
+                                <option value="{{ $roleCase->value }}">{{ $roleCase->label() }}</option>
+                            @endforeach
+                        </select>
+                        @error('role')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nova senha <span class="text-muted">(opcional)</span></label>
+                        <input type="password" name="password" id="editPasswordInput" class="form-control @error('password') is-invalid @enderror" autocomplete="new-password">
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar nova senha</label>
+                        <input type="password" name="password_confirmation" id="editPasswordConfirmationInput" class="form-control" autocomplete="new-password">
                     </div>
                     <div class="modal-footer px-0 pb-0 border-0">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
@@ -193,6 +240,7 @@
             btn.addEventListener('click', function () {
                 const id = this.getAttribute('data-employee-id');
                 const name = this.getAttribute('data-name') || '';
+                const role = this.getAttribute('data-role') || '';
                 const position = this.getAttribute('data-position') || '';
                 const cpfFormatted = this.getAttribute('data-cpf-formatted') || '';
                 const originalName = this.getAttribute('data-original-name') || '';
@@ -201,8 +249,11 @@
                 document.getElementById('deleteEmployeeForm').action = employeesBaseUrl + '/' + id;
                 document.getElementById('editEmployeeIdField').value = id;
                 document.getElementById('editNameInput').value = name;
+                document.getElementById('editRoleSelect').value = role;
                 document.getElementById('editPositionInput').value = position;
                 document.getElementById('editCpfDisplay').value = cpfFormatted;
+                document.getElementById('editPasswordInput').value = '';
+                document.getElementById('editPasswordConfirmationInput').value = '';
                 document.getElementById('editExpectedNameDisplay').textContent = originalName;
                 window.__editEmployeeExpectedName = originalName;
                 document.getElementById('editOriginalNameHidden').value = originalName;
@@ -237,7 +288,7 @@
             var editModal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
             editModal.show();
         });
-    @elseif ($errors->hasAny(['name', 'cpf', 'position']) && ! old('edit_employee_id'))
+    @elseif ($errors->hasAny(['name', 'cpf', 'position', 'password', 'role']) && ! old('edit_employee_id'))
         document.addEventListener('DOMContentLoaded', function () {
             var m = document.getElementById('employeeModal');
             if (m && typeof bootstrap !== 'undefined') {

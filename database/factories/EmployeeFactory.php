@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\EmployeeRole;
 use App\Models\Employee;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -11,8 +12,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 class EmployeeFactory extends Factory
 {
     /**
-     * CPFs válidos (dígitos verificadores corretos) para uso em testes e seed.
-     *
      * @var list<string>
      */
     private const VALID_CPF_POOL = [
@@ -38,8 +37,16 @@ class EmployeeFactory extends Factory
                 fake()->unique()->lastName(),
                 fake()->unique()->lexify('????')
             ),
+            'password' => 'ColaboradorAquicob!2026',
             'cpf' => fake()->unique()->randomElement(self::VALID_CPF_POOL),
             'position' => fake()->jobTitle(),
         ];
+    }
+
+    public function admin(): static
+    {
+        return $this->afterCreating(function (Employee $employee): void {
+            $employee->forceFill(['role' => EmployeeRole::Admin])->save();
+        });
     }
 }

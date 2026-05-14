@@ -2,21 +2,27 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\EmployeeRole;
 use App\Http\Requests\Concerns\ValidatesEmployeeCpfInput;
 use App\Rules\BrazilianCpf;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\Validator;
 use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     schema: 'StoreEmployeeBody',
-    required: ['name', 'cpf', 'position'],
+    required: ['name', 'password', 'cpf', 'position'],
     properties: [
         new OA\Property(property: 'name', description: 'Nome completo (letras, até 120 caracteres)', type: 'string', maxLength: 120, example: 'Maria Silva'),
+        new OA\Property(property: 'password', type: 'string', format: 'password', example: 'SenhaSegura!1'),
+        new OA\Property(property: 'password_confirmation', type: 'string', format: 'password'),
         new OA\Property(property: 'cpf', description: 'CPF com 11 dígitos (com ou sem máscara na API)', type: 'string', example: '529.982.247-25'),
         new OA\Property(property: 'position', description: 'Cargo', type: 'string', maxLength: 255, example: 'Atendente'),
+        new OA\Property(property: 'role', description: 'Apenas interface web autenticada como admin; na API é rejeitado.', type: 'string', enum: ['admin', 'colaborador'], example: 'colaborador'),
     ]
 )]
 class StoreEmployeeRequest extends FormRequest
@@ -25,7 +31,11 @@ class StoreEmployeeRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+        if ($this->is('api/*')) {
+            return true;
+        }
+
+        return $this->user()?->isAdmin() ?? false;
     }
 
     protected function prepareForValidation(): void
@@ -45,8 +55,14 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:120', 'regex:/^[\p{L}\p{M}\s\-\'.]+$/u', Rule::unique('employees', 'name')],
+            'password' => ['required', 'string', Password::min(8), 'confirmed'],
             'cpf' => ['required', 'string', 'digits:11', Rule::unique('employees', 'cpf'), new BrazilianCpf],
             'position' => ['required', 'string', 'max:255'],
+            'role' => Rule::when(
+                $this->is('api/*'),
+                ['prohibited'],
+                ['required', new Enum(EmployeeRole::class)]
+            ),
         ];
     }
 
@@ -57,8 +73,10 @@ class StoreEmployeeRequest extends FormRequest
     {
         return [
             'name' => 'nome',
+            'password' => 'senha',
             'cpf' => 'CPF',
             'position' => 'cargo',
+            'role' => 'perfil',
         ];
     }
 
@@ -74,6 +92,9 @@ class StoreEmployeeRequest extends FormRequest
             'name.regex' => 'Use apenas letras (incluindo acentos), espaços, hífen ou apóstrofo no nome.',
             'name.unique' => 'Este nome já está cadastrado.',
 
+            'password.required' => 'Defina uma senha.',
+            'password.confirmed' => 'A confirmação da senha não confere.',
+
             'cpf.required' => 'Informe o CPF.',
             'cpf.string' => 'O CPF informado é inválido.',
             'cpf.digits' => 'Escreva um CPF válido.',
@@ -82,6 +103,9 @@ class StoreEmployeeRequest extends FormRequest
             'position.required' => 'Informe o cargo ou função.',
             'position.string' => 'O cargo contém caracteres inválidos.',
             'position.max' => 'O cargo não pode ter mais de :max caracteres.',
+
+            'role.required' => 'Selecione o perfil (administrador ou colaborador).',
+            'role.prohibited' => 'O perfil não pode ser definido pela API.',
         ];
     }
 }

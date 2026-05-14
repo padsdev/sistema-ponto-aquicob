@@ -15,6 +15,7 @@ use OpenApi\Attributes as OA;
         new OA\Property(property: 'name', type: 'string', example: 'Maria Silva'),
         new OA\Property(property: 'cpf', type: 'string', example: '529.982.247-25'),
         new OA\Property(property: 'position', type: 'string', example: 'Atendente'),
+        new OA\Property(property: 'role', type: 'string', enum: ['admin', 'colaborador'], example: 'colaborador'),
         new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
         new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
     ]
@@ -31,6 +32,7 @@ class EmployeeResource extends JsonResource
             'name' => $this->name,
             'cpf' => Cpf::formatMasked((string) ($this->cpf ?? '')),
             'position' => $this->position,
+            'role' => $this->role instanceof \BackedEnum ? $this->role->value : $this->role,
             'created_at' => $this->created_at?->toIso8601String(),
             'updated_at' => $this->updated_at?->toIso8601String(),
         ];
