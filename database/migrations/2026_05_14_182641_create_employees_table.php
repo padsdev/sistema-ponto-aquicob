@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('cpf')->unique(); // CPF deve ser único
-            $table->string('position'); // Cargo/Função
+            $table->string('cpf')->unique();
+            $table->string('position');
             $table->timestamps();
         });
     }

@@ -21,20 +21,305 @@
                     "Employees"
                 ],
                 "summary": "Lista todos os funcionários",
-                "description": "Display a listing of the resource.",
                 "operationId": "7fc06f144c1cd7925c5c391a6609f02d",
                 "responses": {
                     "200": {
-                        "description": "Sucesso"
+                        "description": "Lista retornada com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Employee"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     }
                 }
+            },
+            "post": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Cadastra um funcionário",
+                "operationId": "bfad4edec29b0edbd684a0afbd847510",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/StoreEmployeeBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Funcionário criado",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Employee"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/employees/{employee}": {
+            "get": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Obtém um funcionário pelo id",
+                "operationId": "7be3df7eb2d9c301e74a7f9160f44383",
+                "parameters": [
+                    {
+                        "name": "employee",
+                        "in": "path",
+                        "description": "ID do funcionário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Employee"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Funcionário não encontrado"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Atualiza um funcionário",
+                "operationId": "ff9ab641fc6320c1ad01c01b9b05d536",
+                "parameters": [
+                    {
+                        "name": "employee",
+                        "in": "path",
+                        "description": "ID do funcionário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/UpdateEmployeeBody"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Atualizado com sucesso",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/Employee"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Funcionário não encontrado"
+                    },
+                    "422": {
+                        "description": "Erro de validação",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "errors": {
+                                            "type": "object",
+                                            "additionalProperties": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Remove um funcionário",
+                "operationId": "e225f5026a067ec74f6b45726f29e617",
+                "parameters": [
+                    {
+                        "name": "employee",
+                        "in": "path",
+                        "description": "ID do funcionário",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "Removido com sucesso"
+                    },
+                    "404": {
+                        "description": "Funcionário não encontrado"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "StoreEmployeeBody": {
+                "required": [
+                    "name",
+                    "cpf",
+                    "position"
+                ],
+                "properties": {
+                    "name": {
+                        "description": "Nome completo",
+                        "type": "string",
+                        "example": "Maria Silva",
+                        "maxLength": 255
+                    },
+                    "cpf": {
+                        "description": "CPF com 11 dígitos (somente números)",
+                        "type": "string",
+                        "pattern": "^[0-9]{11}$",
+                        "example": "52998224725"
+                    },
+                    "position": {
+                        "description": "Cargo",
+                        "type": "string",
+                        "example": "Atendente",
+                        "maxLength": 255
+                    }
+                },
+                "type": "object"
+            },
+            "UpdateEmployeeBody": {
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "example": "Maria Silva Santos",
+                        "maxLength": 255
+                    },
+                    "cpf": {
+                        "type": "string",
+                        "pattern": "^[0-9]{11}$",
+                        "example": "52998224725"
+                    },
+                    "position": {
+                        "type": "string",
+                        "example": "Supervisora",
+                        "maxLength": 255
+                    }
+                },
+                "type": "object"
+            },
+            "Employee": {
+                "title": "Funcionário",
+                "properties": {
+                    "id": {
+                        "type": "integer",
+                        "example": 1
+                    },
+                    "name": {
+                        "type": "string",
+                        "example": "Maria Silva"
+                    },
+                    "cpf": {
+                        "type": "string",
+                        "example": "52998224725"
+                    },
+                    "position": {
+                        "type": "string",
+                        "example": "Atendente"
+                    },
+                    "created_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "updated_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    }
+                },
+                "type": "object"
             }
         }
     },
     "tags": [
         {
             "name": "Employees",
-            "description": "Employees"
+            "description": "Cadastro de funcionários"
         }
     ]
 }
