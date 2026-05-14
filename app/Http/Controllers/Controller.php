@@ -23,8 +23,6 @@ Os endpoints registados em `routes/api.php` estão **públicos** (sem token nem 
 - Na **atualização** pela API, `role` também é proibido.
 - O CPF é armazenado com 11 dígitos; na API pode enviar-se com ou sem máscara; nas respostas devolve-se mascarado.
 MARKDOWN,
-    contact: new OA\Contact(name: 'AQUICOB', email: 'admin@exemplo.com'),
-    license: new OA\License(name: 'MIT', identifier: 'MIT'),
 )]
 #[OA\Server(
     url: '/',

@@ -3,13 +3,6 @@
     "info": {
         "title": "Sistema de Ponto AQUICOB — API REST",
         "description": "REST API do **Sistema de Ponto Eletrónico** (AQUICOB).\n\n### Autenticação\nOs endpoints registados em `routes/api.php` estão **públicos** (sem token nem sessão) nesta versão de demonstração. **Em produção** deve proteger-se a API (por exemplo [Laravel Sanctum](https://laravel.com/docs/sanctum) ou um API gateway).\n\n### Convenções\n- Pedidos com corpo: `Content-Type: application/json`.\n- Respostas de recurso ou lista seguem o envelope Laravel: `{\"data\": ...}`.\n- Erros de validação: HTTP `422` com `message` e objeto `errors` por campo.\n\n### Funcionários (`/api/employees`)\n- Na **API**, ao criar um funcionário o papel é sempre **colaborador**; o campo `role` no JSON é **proibido** (`422` se enviado).\n- Na **atualização** pela API, `role` também é proibido.\n- O CPF é armazenado com 11 dígitos; na API pode enviar-se com ou sem máscara; nas respostas devolve-se mascarado.",
-        "contact": {
-            "name": "AQUICOB",
-            "email": "admin@exemplo.com"
-        },
-        "license": {
-            "name": "MIT"
-        },
         "version": "1.0.0"
     },
     "servers": [
