@@ -1,0 +1,40 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "Sistema de Ponto - AQUICOB",
+        "description": "Documentação do Teste Técnico de Sistema de Ponto Eletrônico",
+        "contact": {
+            "email": "admin@exemplo.com"
+        },
+        "version": "1.0.0"
+    },
+    "servers": [
+        {
+            "url": "/",
+            "description": "Servidor atual (mesmo host da UI)"
+        }
+    ],
+    "paths": {
+        "/api/employees": {
+            "get": {
+                "tags": [
+                    "Employees"
+                ],
+                "summary": "Lista todos os funcionários",
+                "description": "Display a listing of the resource.",
+                "operationId": "7fc06f144c1cd7925c5c391a6609f02d",
+                "responses": {
+                    "200": {
+                        "description": "Sucesso"
+                    }
+                }
+            }
+        }
+    },
+    "tags": [
+        {
+            "name": "Employees",
+            "description": "Employees"
+        }
+    ]
+}
