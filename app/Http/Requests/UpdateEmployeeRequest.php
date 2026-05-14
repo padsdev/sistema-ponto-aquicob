@@ -15,13 +15,14 @@ use OpenApi\Attributes as OA;
 
 #[OA\Schema(
     schema: 'UpdateEmployeeBody',
+    description: 'Corpo parcial (atualização). Todos os campos são opcionais; envie apenas o que pretende alterar. Na **API**, o campo `role` é **proibido**.',
     properties: [
         new OA\Property(property: 'name', type: 'string', maxLength: 120, example: 'Maria Silva Santos'),
-        new OA\Property(property: 'password', type: 'string', format: 'password'),
+        new OA\Property(property: 'password', description: 'Se enviado, mínimo 8 caracteres e exige `password_confirmation`', type: 'string', format: 'password'),
         new OA\Property(property: 'password_confirmation', type: 'string', format: 'password'),
-        new OA\Property(property: 'cpf', type: 'string', example: '529.982.247-25'),
+        new OA\Property(property: 'cpf', description: '11 dígitos ou com máscara', type: 'string', example: '529.982.247-25'),
         new OA\Property(property: 'position', type: 'string', maxLength: 255, example: 'Supervisora'),
-        new OA\Property(property: 'role', description: 'Na API é rejeitado; apenas admin na área web.', type: 'string', enum: ['admin', 'colaborador']),
+        new OA\Property(property: 'role', description: '**Proibido na API** (422).', type: 'string', enum: ['admin', 'colaborador']),
     ]
 )]
 class UpdateEmployeeRequest extends FormRequest

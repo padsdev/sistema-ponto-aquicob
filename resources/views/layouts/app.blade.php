@@ -21,8 +21,6 @@
                         <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-sm">Bater o Ponto</a>
                         <a href="{{ route('reports.clock') }}" class="btn btn-outline-light btn-sm">Relatório de Ponto</a>
                         <a href="{{ route('employees.index') }}" class="btn btn-outline-light btn-sm">Funcionários</a>
-                    @else
-                        <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm">Bater o ponto</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}" class="d-inline">
                         @csrf

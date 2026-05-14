@@ -1,17 +1,21 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "Sistema de Ponto - AQUICOB",
-        "description": "Documentação do Teste Técnico de Sistema de Ponto Eletrônico",
+        "title": "Sistema de Ponto AQUICOB — API REST",
+        "description": "REST API do **Sistema de Ponto Eletrónico** (AQUICOB).\n\n### Autenticação\nOs endpoints registados em `routes/api.php` estão **públicos** (sem token nem sessão) nesta versão de demonstração. **Em produção** deve proteger-se a API (por exemplo [Laravel Sanctum](https://laravel.com/docs/sanctum) ou um API gateway).\n\n### Convenções\n- Pedidos com corpo: `Content-Type: application/json`.\n- Respostas de recurso ou lista seguem o envelope Laravel: `{\"data\": ...}`.\n- Erros de validação: HTTP `422` com `message` e objeto `errors` por campo.\n\n### Funcionários (`/api/employees`)\n- Na **API**, ao criar um funcionário o papel é sempre **colaborador**; o campo `role` no JSON é **proibido** (`422` se enviado).\n- Na **atualização** pela API, `role` também é proibido.\n- O CPF é armazenado com 11 dígitos; na API pode enviar-se com ou sem máscara; nas respostas devolve-se mascarado.",
         "contact": {
+            "name": "AQUICOB",
             "email": "admin@exemplo.com"
+        },
+        "license": {
+            "name": "MIT"
         },
         "version": "1.0.0"
     },
     "servers": [
         {
             "url": "/",
-            "description": "Servidor atual (mesmo host da UI)"
+            "description": "URL base da aplicação. Os paths abaixo incluem o prefixo `/api` (Laravel `routes/api.php`)."
         }
     ],
     "paths": {
@@ -21,6 +25,7 @@
                     "Employees"
                 ],
                 "summary": "Lista todos os funcionários",
+                "description": "Devolve todos os registos ordenados por nome. Sem paginação.",
                 "operationId": "7fc06f144c1cd7925c5c391a6609f02d",
                 "responses": {
                     "200": {
@@ -48,6 +53,7 @@
                     "Employees"
                 ],
                 "summary": "Cadastra um funcionário",
+                "description": "Cria um funcionário com papel **colaborador**. O campo `role` no corpo é rejeitado pela API.",
                 "operationId": "bfad4edec29b0edbd684a0afbd847510",
                 "requestBody": {
                     "required": true,
@@ -76,7 +82,7 @@
                         }
                     },
                     "422": {
-                        "description": "Erro de validação",
+                        "description": "Erro de validação (CPF inválido, duplicado, `role` enviado, etc.)",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -103,6 +109,7 @@
                     "Employees"
                 ],
                 "summary": "Obtém um funcionário pelo id",
+                "description": "O parâmetro de rota `employee` é o identificador numérico (chave primária).",
                 "operationId": "7be3df7eb2d9c301e74a7f9160f44383",
                 "parameters": [
                     {
@@ -118,7 +125,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Sucesso",
+                        "description": "Recurso encontrado",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -133,7 +140,7 @@
                         }
                     },
                     "404": {
-                        "description": "Funcionário não encontrado"
+                        "description": "Nenhum funcionário com o id indicado"
                     }
                 }
             },
@@ -142,6 +149,7 @@
                     "Employees"
                 ],
                 "summary": "Atualiza um funcionário",
+                "description": "Atualização parcial: envie apenas os campos a alterar. Palavra-passe opcional (mínimo 8 caracteres com regras Laravel). O campo `role` é rejeitado pela API.",
                 "operationId": "ff9ab641fc6320c1ad01c01b9b05d536",
                 "parameters": [
                     {
@@ -182,7 +190,7 @@
                         }
                     },
                     "404": {
-                        "description": "Funcionário não encontrado"
+                        "description": "Nenhum funcionário com o id indicado"
                     },
                     "422": {
                         "description": "Erro de validação",
@@ -210,6 +218,7 @@
                     "Employees"
                 ],
                 "summary": "Remove um funcionário",
+                "description": "Resposta sem corpo em caso de sucesso.",
                 "operationId": "e225f5026a067ec74f6b45726f29e617",
                 "parameters": [
                     {
@@ -225,10 +234,10 @@
                 ],
                 "responses": {
                     "204": {
-                        "description": "Removido com sucesso"
+                        "description": "Removido com sucesso (sem conteúdo)"
                     },
                     "404": {
-                        "description": "Funcionário não encontrado"
+                        "description": "Nenhum funcionário com o id indicado"
                     }
                 }
             }
@@ -239,11 +248,9 @@
             "StoreEmployeeBody": {
                 "required": [
                     "name",
-                    "email",
                     "password",
                     "cpf",
-                    "position",
-                    "role"
+                    "position"
                 ],
                 "properties": {
                     "name": {
@@ -252,22 +259,19 @@
                         "example": "Maria Silva",
                         "maxLength": 120
                     },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "example": "maria@exemplo.com"
-                    },
                     "password": {
+                        "description": "Mínimo 8 caracteres (regras `Password` do Laravel)",
                         "type": "string",
                         "format": "password",
                         "example": "SenhaSegura!1"
                     },
                     "password_confirmation": {
+                        "description": "Deve coincidir com `password`",
                         "type": "string",
                         "format": "password"
                     },
                     "cpf": {
-                        "description": "CPF com 11 dígitos (com ou sem máscara na API)",
+                        "description": "11 dígitos ou com máscara; dígitos verificadores válidos",
                         "type": "string",
                         "example": "529.982.247-25"
                     },
@@ -278,6 +282,7 @@
                         "maxLength": 255
                     },
                     "role": {
+                        "description": "**Proibido na API** (422). Apenas na criação pela área web admin.",
                         "type": "string",
                         "example": "colaborador",
                         "enum": [
@@ -289,17 +294,15 @@
                 "type": "object"
             },
             "UpdateEmployeeBody": {
+                "description": "Corpo parcial (atualização). Todos os campos são opcionais; envie apenas o que pretende alterar. Na **API**, o campo `role` é **proibido**.",
                 "properties": {
                     "name": {
                         "type": "string",
                         "example": "Maria Silva Santos",
                         "maxLength": 120
                     },
-                    "email": {
-                        "type": "string",
-                        "format": "email"
-                    },
                     "password": {
+                        "description": "Se enviado, mínimo 8 caracteres e exige `password_confirmation`",
                         "type": "string",
                         "format": "password"
                     },
@@ -308,6 +311,7 @@
                         "format": "password"
                     },
                     "cpf": {
+                        "description": "11 dígitos ou com máscara",
                         "type": "string",
                         "example": "529.982.247-25"
                     },
@@ -317,6 +321,7 @@
                         "maxLength": 255
                     },
                     "role": {
+                        "description": "**Proibido na API** (422).",
                         "type": "string",
                         "enum": [
                             "admin",
@@ -328,29 +333,30 @@
             },
             "Employee": {
                 "title": "Funcionário",
+                "description": "Recurso devolvido em `data` (objeto ou lista).",
                 "properties": {
                     "id": {
+                        "description": "Chave primária",
                         "type": "integer",
                         "example": 1
                     },
                     "name": {
+                        "description": "Nome completo (único na base de dados)",
                         "type": "string",
                         "example": "Maria Silva"
                     },
-                    "email": {
-                        "type": "string",
-                        "format": "email",
-                        "example": "maria@exemplo.com"
-                    },
                     "cpf": {
+                        "description": "CPF mascarado (xxx.xxx.xxx-xx)",
                         "type": "string",
                         "example": "529.982.247-25"
                     },
                     "position": {
+                        "description": "Cargo ou função",
                         "type": "string",
                         "example": "Atendente"
                     },
                     "role": {
+                        "description": "Papel: `admin` ou `colaborador`",
                         "type": "string",
                         "example": "colaborador",
                         "enum": [
@@ -359,10 +365,12 @@
                         ]
                     },
                     "created_at": {
+                        "description": "ISO 8601",
                         "type": "string",
                         "format": "date-time"
                     },
                     "updated_at": {
+                        "description": "ISO 8601",
                         "type": "string",
                         "format": "date-time"
                     }
@@ -374,7 +382,11 @@
     "tags": [
         {
             "name": "Employees",
-            "description": "Cadastro de funcionários"
+            "description": "CRUD de funcionários (também usado pela área web admin; nesta documentação apenas os contratos HTTP da API JSON)."
         }
-    ]
+    ],
+    "externalDocs": {
+        "description": "Interface Swagger UI (explorar e testar a API no browser)",
+        "url": "/api/documentation"
+    }
 }

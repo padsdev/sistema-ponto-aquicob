@@ -10,14 +10,15 @@ use OpenApi\Attributes as OA;
 #[OA\Schema(
     schema: 'Employee',
     title: 'Funcionário',
+    description: 'Recurso devolvido em `data` (objeto ou lista).',
     properties: [
-        new OA\Property(property: 'id', type: 'integer', example: 1),
-        new OA\Property(property: 'name', type: 'string', example: 'Maria Silva'),
-        new OA\Property(property: 'cpf', type: 'string', example: '529.982.247-25'),
-        new OA\Property(property: 'position', type: 'string', example: 'Atendente'),
-        new OA\Property(property: 'role', type: 'string', enum: ['admin', 'colaborador'], example: 'colaborador'),
-        new OA\Property(property: 'created_at', type: 'string', format: 'date-time'),
-        new OA\Property(property: 'updated_at', type: 'string', format: 'date-time'),
+        new OA\Property(property: 'id', description: 'Chave primária', type: 'integer', example: 1),
+        new OA\Property(property: 'name', description: 'Nome completo (único na base de dados)', type: 'string', example: 'Maria Silva'),
+        new OA\Property(property: 'cpf', description: 'CPF mascarado (xxx.xxx.xxx-xx)', type: 'string', example: '529.982.247-25'),
+        new OA\Property(property: 'position', description: 'Cargo ou função', type: 'string', example: 'Atendente'),
+        new OA\Property(property: 'role', description: 'Papel: `admin` ou `colaborador`', type: 'string', enum: ['admin', 'colaborador'], example: 'colaborador'),
+        new OA\Property(property: 'created_at', description: 'ISO 8601', type: 'string', format: 'date-time'),
+        new OA\Property(property: 'updated_at', description: 'ISO 8601', type: 'string', format: 'date-time'),
     ]
 )]
 class EmployeeResource extends JsonResource
