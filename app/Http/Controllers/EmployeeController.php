@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\EmployeeRole;
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 use App\Http\Resources\EmployeeResource;
@@ -10,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\Support\Arr;
 use Illuminate\View\View;
 use OpenApi\Attributes as OA;
 
@@ -82,7 +84,14 @@ class EmployeeController extends Controller
     )]
     public function store(StoreEmployeeRequest $request): JsonResponse|RedirectResponse
     {
-        $employee = Employee::create($request->validated());
+        $attributes = $request->safe()->only(['name', 'cpf', 'position', 'password'])->all();
+
+        $role = $request->is('api/*')
+            ? EmployeeRole::Colaborador
+            : $request->enum('role', EmployeeRole::class);
+
+        $employee = Employee::create($attributes);
+        $employee->forceFill(['role' => $role])->save();
 
         if ($request->is('api/*')) {
             return (new EmployeeResource($employee))
@@ -157,10 +166,18 @@ class EmployeeController extends Controller
     )]
     public function update(UpdateEmployeeRequest $request, Employee $employee): EmployeeResource|RedirectResponse
     {
-        $employee->update($request->validated());
+        $validated = $request->validated();
+        $validated = Arr::only($validated, ['name', 'cpf', 'position', 'password']);
+        $employee->update($validated);
+
+        if ($request->is('api/*') === false && $request->filled('role')) {
+            $employee->forceFill(['role' => $request->enum('role', EmployeeRole::class)])->save();
+        }
+
+        $employee->refresh();
 
         if ($request->is('api/*')) {
-            return new EmployeeResource($employee->fresh());
+            return new EmployeeResource($employee);
         }
 
         return redirect()->route('employees.index')->with('status', 'Funcionário atualizado com sucesso.');

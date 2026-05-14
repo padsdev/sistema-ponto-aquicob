@@ -2,16 +2,51 @@
 
 namespace App\Models;
 
+use App\Enums\EmployeeRole;
 use App\Support\Cpf;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class Employee extends Model
+class Employee extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
-    protected $fillable = ['name', 'cpf', 'position'];
+    /**
+     * @var list<string>
+     */
+    protected $fillable = [
+        'name',
+        'cpf',
+        'position',
+        'password',
+    ];
+
+    /**
+     * @var list<string>
+     */
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'password' => 'hashed',
+            'role' => EmployeeRole::class,
+        ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === EmployeeRole::Admin;
+    }
 
     /**
      * CPF armazenado somente com dígitos; exibição com máscara em telas.
@@ -21,7 +56,7 @@ class Employee extends Model
         return Attribute::get(fn (): string => Cpf::formatMasked((string) ($this->attributes['cpf'] ?? '')));
     }
 
-    public function clockings()
+    public function clockings(): HasMany
     {
         return $this->hasMany(Clocking::class);
     }

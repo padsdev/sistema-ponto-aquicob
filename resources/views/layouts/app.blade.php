@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sistema de Ponto - AQUICOB</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/all.min.css">
@@ -10,11 +11,25 @@
 <body class="bg-light">
     <nav class="navbar navbar-dark bg-dark mb-4">
         <div class="container">
-            <span class="navbar-brand">AQUICOB | Ponto Eletrônico</span>
-            <div class="d-flex">
-                <a href="{{ route('employees.index') }}" class="btn btn-outline-light me-2">Funcionários</a>
-                <a href="#" class="btn btn-outline-light">Relatórios</a>
-            </div>
+            <a class="navbar-brand text-decoration-none text-white" href="{{ auth()->user()->isAdmin() ? route('dashboard') : route('home') }}">
+                AQUICOB | Ponto Eletrônico
+            </a>
+            @auth
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                    <span class="navbar-text text-white small">{{ auth()->user()->name }}</span>
+                    @if (auth()->user()->isAdmin())
+                        <a href="{{ route('dashboard') }}" class="btn btn-outline-light btn-sm">Bater o Ponto</a>
+                        <a href="{{ route('reports.clock') }}" class="btn btn-outline-light btn-sm">Relatório de Ponto</a>
+                        <a href="{{ route('employees.index') }}" class="btn btn-outline-light btn-sm">Funcionários</a>
+                    @else
+                        <a href="{{ route('home') }}" class="btn btn-outline-light btn-sm">Início</a>
+                    @endif
+                    <form method="POST" action="{{ route('logout') }}" class="d-inline">
+                        @csrf
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Sair</button>
+                    </form>
+                </div>
+            @endauth
         </div>
     </nav>
 
