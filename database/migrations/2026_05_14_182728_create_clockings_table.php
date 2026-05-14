@@ -14,8 +14,9 @@ return new class extends Migration
         Schema::create('clockings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('employee_id')->constrained()->onDelete('cascade');
-            $table->timestamp('punched_at'); // Registro automático de data e hora
-            $table->enum('type', ['E', 'S']); // Entrada ou Saída [cite: 15]
+            $table->timestamp('punched_at');
+            $table->enum('type', ['E', 'S']);
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }
