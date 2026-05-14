@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\ClockingController;
 use App\Http\Controllers\ClockReportController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EmployeeController;
@@ -14,6 +15,9 @@ Route::middleware('guest')->group(function (): void {
 Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::get('/inicio', [DashboardController::class, 'employeeHome'])->name('home');
+    Route::post('/clockings', [ClockingController::class, 'store'])
+        ->middleware('throttle:60,1')
+        ->name('clockings.store');
 });
 
 Route::middleware(['auth', 'admin'])->group(function (): void {

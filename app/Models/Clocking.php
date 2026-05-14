@@ -2,17 +2,34 @@
 
 namespace App\Models;
 
+use App\Enums\ClockingType;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Clocking extends Model
 {
-    protected $fillable = ['employee_id', 'punched_at', 'type'];
-
-    protected $casts = [
-        'punched_at' => 'datetime',
+    /**
+     * @var list<string>
+     */
+    protected $fillable = [
+        'employee_id',
+        'punched_at',
+        'type',
+        'notes',
     ];
 
-    public function employee()
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'punched_at' => 'datetime',
+            'type' => ClockingType::class,
+        ];
+    }
+
+    public function employee(): BelongsTo
     {
         return $this->belongsTo(Employee::class);
     }
