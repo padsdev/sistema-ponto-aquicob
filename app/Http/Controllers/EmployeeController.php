@@ -7,7 +7,10 @@ use App\Http\Requests\UpdateEmployeeRequest;
 use App\Http\Resources\EmployeeResource;
 use App\Models\Employee;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
+use Illuminate\View\View;
 use OpenApi\Attributes as OA;
 
 #[OA\Tag(name: 'Employees', description: 'Cadastro de funcionários')]
@@ -33,11 +36,15 @@ class EmployeeController extends Controller
             ),
         ]
     )]
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse|View
     {
         $employees = Employee::query()->orderBy('name')->get();
 
-        return EmployeeResource::collection($employees)->response();
+        if ($request->is('api/*')) {
+            return EmployeeResource::collection($employees)->response();
+        }
+
+        return view('employees.index', compact('employees'));
     }
 
     #[OA\Post(
@@ -73,13 +80,17 @@ class EmployeeController extends Controller
             ),
         ]
     )]
-    public function store(StoreEmployeeRequest $request): JsonResponse
+    public function store(StoreEmployeeRequest $request): JsonResponse|RedirectResponse
     {
         $employee = Employee::create($request->validated());
 
-        return (new EmployeeResource($employee))
-            ->response()
-            ->setStatusCode(Response::HTTP_CREATED);
+        if ($request->is('api/*')) {
+            return (new EmployeeResource($employee))
+                ->response()
+                ->setStatusCode(Response::HTTP_CREATED);
+        }
+
+        return redirect()->route('employees.index')->with('status', 'Funcionário cadastrado com sucesso.');
     }
 
     #[OA\Get(
@@ -144,11 +155,15 @@ class EmployeeController extends Controller
             ),
         ]
     )]
-    public function update(UpdateEmployeeRequest $request, Employee $employee): EmployeeResource
+    public function update(UpdateEmployeeRequest $request, Employee $employee): EmployeeResource|RedirectResponse
     {
         $employee->update($request->validated());
 
-        return new EmployeeResource($employee->fresh());
+        if ($request->is('api/*')) {
+            return new EmployeeResource($employee->fresh());
+        }
+
+        return redirect()->route('employees.index')->with('status', 'Funcionário atualizado com sucesso.');
     }
 
     #[OA\Delete(
@@ -163,10 +178,33 @@ class EmployeeController extends Controller
             new OA\Response(response: 404, description: 'Funcionário não encontrado'),
         ]
     )]
-    public function destroy(Employee $employee): Response
+    public function destroy(Request $request, Employee $employee): Response|RedirectResponse
     {
+        if ($request->is('api/*')) {
+            $employee->delete();
+
+            return response()->noContent();
+        }
+
+        $request->validate(
+            [
+                'delete_confirmation' => [
+                    'required',
+                    'string',
+                    function (string $attribute, mixed $value, \Closure $fail) use ($employee): void {
+                        if (trim((string) $value) !== trim($employee->name)) {
+                            $fail('Digite exatamente o nome completo do funcionário para confirmar a exclusão.');
+                        }
+                    },
+                ],
+            ],
+            [
+                'delete_confirmation.required' => 'Digite o nome completo para confirmar a exclusão.',
+            ]
+        );
+
         $employee->delete();
 
-        return response()->noContent();
+        return redirect()->route('employees.index')->with('status', 'Funcionário removido com sucesso.');
     }
 }
