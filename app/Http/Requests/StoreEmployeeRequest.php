@@ -18,11 +18,11 @@ use OpenApi\Attributes as OA;
     required: ['name', 'password', 'cpf', 'position'],
     properties: [
         new OA\Property(property: 'name', description: 'Nome completo (letras, até 120 caracteres)', type: 'string', maxLength: 120, example: 'Maria Silva'),
-        new OA\Property(property: 'password', type: 'string', format: 'password', example: 'SenhaSegura!1'),
-        new OA\Property(property: 'password_confirmation', type: 'string', format: 'password'),
-        new OA\Property(property: 'cpf', description: 'CPF com 11 dígitos (com ou sem máscara na API)', type: 'string', example: '529.982.247-25'),
+        new OA\Property(property: 'password', description: 'Mínimo 8 caracteres (regras `Password` do Laravel)', type: 'string', format: 'password', example: 'SenhaSegura!1'),
+        new OA\Property(property: 'password_confirmation', description: 'Deve coincidir com `password`', type: 'string', format: 'password'),
+        new OA\Property(property: 'cpf', description: '11 dígitos ou com máscara; dígitos verificadores válidos', type: 'string', example: '529.982.247-25'),
         new OA\Property(property: 'position', description: 'Cargo', type: 'string', maxLength: 255, example: 'Atendente'),
-        new OA\Property(property: 'role', description: 'Apenas interface web autenticada como admin; na API é rejeitado.', type: 'string', enum: ['admin', 'colaborador'], example: 'colaborador'),
+        new OA\Property(property: 'role', description: '**Proibido na API** (422). Apenas na criação pela área web admin.', type: 'string', enum: ['admin', 'colaborador'], example: 'colaborador'),
     ]
 )]
 class StoreEmployeeRequest extends FormRequest

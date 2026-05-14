@@ -15,12 +15,13 @@ use Illuminate\Support\Arr;
 use Illuminate\View\View;
 use OpenApi\Attributes as OA;
 
-#[OA\Tag(name: 'Employees', description: 'Cadastro de funcionários')]
+#[OA\Tag(name: 'Employees', description: 'CRUD de funcionários (também usado pela área web admin; nesta documentação apenas os contratos HTTP da API JSON).')]
 class EmployeeController extends Controller
 {
     #[OA\Get(
         path: '/api/employees',
         summary: 'Lista todos os funcionários',
+        description: 'Devolve todos os registos ordenados por nome. Sem paginação.',
         tags: ['Employees'],
         responses: [
             new OA\Response(
@@ -52,6 +53,7 @@ class EmployeeController extends Controller
     #[OA\Post(
         path: '/api/employees',
         summary: 'Cadastra um funcionário',
+        description: 'Cria um funcionário com papel **colaborador**. O campo `role` no corpo é rejeitado pela API.',
         tags: ['Employees'],
         requestBody: new OA\RequestBody(
             required: true,
@@ -72,7 +74,7 @@ class EmployeeController extends Controller
             ),
             new OA\Response(
                 response: 422,
-                description: 'Erro de validação',
+                description: 'Erro de validação (CPF inválido, duplicado, `role` enviado, etc.)',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'message', type: 'string'),
@@ -105,6 +107,7 @@ class EmployeeController extends Controller
     #[OA\Get(
         path: '/api/employees/{employee}',
         summary: 'Obtém um funcionário pelo id',
+        description: 'O parâmetro de rota `employee` é o identificador numérico (chave primária).',
         tags: ['Employees'],
         parameters: [
             new OA\Parameter(name: 'employee', in: 'path', required: true, description: 'ID do funcionário', schema: new OA\Schema(type: 'integer', example: 1)),
@@ -112,14 +115,14 @@ class EmployeeController extends Controller
         responses: [
             new OA\Response(
                 response: 200,
-                description: 'Sucesso',
+                description: 'Recurso encontrado',
                 content: new OA\JsonContent(
                     properties: [
                         new OA\Property(property: 'data', ref: '#/components/schemas/Employee'),
                     ]
                 )
             ),
-            new OA\Response(response: 404, description: 'Funcionário não encontrado'),
+            new OA\Response(response: 404, description: 'Nenhum funcionário com o id indicado'),
         ]
     )]
     public function show(Employee $employee): EmployeeResource
@@ -130,6 +133,7 @@ class EmployeeController extends Controller
     #[OA\Put(
         path: '/api/employees/{employee}',
         summary: 'Atualiza um funcionário',
+        description: 'Atualização parcial: envie apenas os campos a alterar. Palavra-passe opcional (mínimo 8 caracteres com regras Laravel). O campo `role` é rejeitado pela API.',
         tags: ['Employees'],
         parameters: [
             new OA\Parameter(name: 'employee', in: 'path', required: true, description: 'ID do funcionário', schema: new OA\Schema(type: 'integer', example: 1)),
@@ -151,7 +155,7 @@ class EmployeeController extends Controller
                     ]
                 )
             ),
-            new OA\Response(response: 404, description: 'Funcionário não encontrado'),
+            new OA\Response(response: 404, description: 'Nenhum funcionário com o id indicado'),
             new OA\Response(
                 response: 422,
                 description: 'Erro de validação',
@@ -186,13 +190,14 @@ class EmployeeController extends Controller
     #[OA\Delete(
         path: '/api/employees/{employee}',
         summary: 'Remove um funcionário',
+        description: 'Resposta sem corpo em caso de sucesso.',
         tags: ['Employees'],
         parameters: [
             new OA\Parameter(name: 'employee', in: 'path', required: true, description: 'ID do funcionário', schema: new OA\Schema(type: 'integer', example: 1)),
         ],
         responses: [
-            new OA\Response(response: 204, description: 'Removido com sucesso'),
-            new OA\Response(response: 404, description: 'Funcionário não encontrado'),
+            new OA\Response(response: 204, description: 'Removido com sucesso (sem conteúdo)'),
+            new OA\Response(response: 404, description: 'Nenhum funcionário com o id indicado'),
         ]
     )]
     public function destroy(Request $request, Employee $employee): Response|RedirectResponse

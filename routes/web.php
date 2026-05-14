@@ -23,5 +23,7 @@ Route::middleware('auth')->group(function (): void {
 Route::middleware(['auth', 'admin'])->group(function (): void {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/relatorio-ponto', [ClockReportController::class, 'index'])->name('reports.clock');
+    Route::get('/relatorio-ponto/export/csv', [ClockReportController::class, 'exportCsv'])->name('reports.clock.export.csv');
+    Route::get('/relatorio-ponto/print', [ClockReportController::class, 'exportPrint'])->name('reports.clock.export.pdf');
     Route::resource('employees', EmployeeController::class)->only(['index', 'store', 'update', 'destroy']);
 });
